@@ -622,9 +622,8 @@ where
             }),
         };
 
-        let elapsed_samples = (pos.as_secs() - 1) as usize
-            * self.info.sample_rate as usize
-            * self.info.channels as usize;
+        let elapsed_samples =
+            pos.as_secs() as usize * self.info.sample_rate as usize * self.info.channels as usize;
         self.info
             .samples_elapsed
             .store(elapsed_samples as usize, Ordering::Relaxed);
