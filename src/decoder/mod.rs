@@ -606,7 +606,7 @@ where
 
     #[inline]
     fn try_seek(&mut self, pos: Duration) -> Result<(), SeekError> {
-        match &mut self.decoder {
+        let res = match &mut self.decoder {
             #[cfg(all(feature = "wav", not(feature = "symphonia-wav")))]
             DecoderImpl::Wav(source) => source.try_seek(pos),
             #[cfg(all(feature = "vorbis", not(feature = "symphonia-vorbis")))]
@@ -620,7 +620,16 @@ where
             DecoderImpl::None(_) => Err(SeekError::NotSupported {
                 underlying_source: "DecoderImpl::None",
             }),
-        }
+        };
+
+        let elapsed_samples = (pos.as_secs() - 1) as usize
+            * self.info.sample_rate as usize
+            * self.info.channels as usize;
+        self.info
+            .samples_elapsed
+            .store(elapsed_samples as usize, Ordering::Relaxed);
+
+        res
     }
 }
 
